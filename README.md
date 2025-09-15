@@ -160,7 +160,7 @@ Our approach ensures reliable results through:
 ## Documentation
 
 - **[Complete Analysis Report](report.md)**: Detailed methodology and results
-**[Results Dashboard](results_dashboard.html)**: Interactive charts and visualization data
+- **[Results Dashboard](results_dashboard.html)**: Interactive charts and visualization data
 
 ## Contributing
 
