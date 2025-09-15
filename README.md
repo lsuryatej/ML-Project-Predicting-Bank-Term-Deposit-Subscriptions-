@@ -55,11 +55,6 @@ This project investigates whether high-quality synthetic data can effectively su
 python main.py
 ```
 
-**Run the interactive demo directly:**
-```bash
-python demo_walkthrough.py
-```
-
 **Run the enhanced demo with advanced features:**
 ```bash
 python enhanced_demo.py
@@ -116,13 +111,12 @@ bank-term-deposit-prediction/
 │   └── enhanced_transfer_learning.py # Transfer learning methods
 ├── artifacts/                # Generated outputs (models, plots, results)
 ├── main.py                   # Main application entry point
-├── demo_walkthrough.py       # Interactive ML pipeline demo
 ├── enhanced_demo.py          # Enhanced demo with advanced features
 ├── graph_data_for_report.py  # Visualization data generator
 ├── config.yaml               # Configuration settings
 ├── requirements.txt          # Python dependencies
 ├── report.md                 # Comprehensive analysis report
-├── GRAPH_DATA_SUMMARY.md     # Visualization data summary
+├── results_dashboard.html    # Interactive visualization dashboard
 ├── LICENSE                   # MIT license
 └── README.md                 # This file
 ```
@@ -166,7 +160,7 @@ Our approach ensures reliable results through:
 ## Documentation
 
 - **[Complete Analysis Report](report.md)**: Detailed methodology and results
-- **[Visualization Data](GRAPH_DATA_SUMMARY.md)**: Charts and graphs data
+**[Results Dashboard](results_dashboard.html)**: Interactive charts and visualization data
 
 ## Contributing
 
