@@ -1,0 +1,112 @@
+# ============================================================================
+# BANK TERM DEPOSIT PREDICTION - CONFIGURATION FILE
+# ============================================================================
+# This file contains all configuration parameters for the ML pipeline.
+# Modify these settings to customize the experiment behavior.
+
+# Dataset file paths - update these to match your data location
+paths:
+  real_csv: data/raw/real.csv                    # Real bank marketing dataset
+  synth_train_csv: data/raw/synth_train.csv      # Synthetic training data
+  synth_test_csv: data/raw/synth_test.csv        # Synthetic test data (optional)
+
+# Target variable configuration
+target:
+  name: auto                                      # 'auto' for automatic detection or specify column name
+  positive_labels: ["yes", "1", 1, "true", "True"]  # Values that represent positive class (subscription)
+
+# Train-test split configuration
+split:
+  test_size: 0.2                                  # Proportion of data for testing (20%)
+  random_state: 42                                # Random seed for reproducible splits
+  stratify: true                                  # Maintain class balance in splits
+
+# Experiment configuration
+experiments:
+  small_real_fractions: [0.01, 0.05, 0.10, 0.25, 0.50, 1.0]  # Data efficiency experiment fractions
+  combine_synth_train_and_test: true             # Whether to combine synthetic train/test sets
+  enable_neural_networks: false                  # Enable neural network models (requires more compute)
+  parallel_execution: false                      # Enable parallel model training
+
+# Model configuration - controls which algorithms to use
+models:
+  use_xgboost_if_available: true                  # Use XGBoost if installed
+  use_catboost_if_available: true                 # Use CatBoost if installed  
+  use_lightgbm_if_available: true                 # Use LightGBM if installed
+  enable_neural_networks: false                   # Enable neural network models
+  
+  # Random Forest hyperparameters
+  random_forest:
+    n_estimators: 400                             # Number of trees in the forest
+    max_depth: null                               # Maximum tree depth (None = unlimited)
+    min_samples_split: 2                          # Minimum samples required to split node
+    min_samples_leaf: 1                           # Minimum samples required at leaf node
+    n_jobs: -1                                    # Use all available CPU cores
+    random_state: 42                              # Random seed for reproducibility
+    
+  # Logistic Regression hyperparameters  
+  logistic_regression:
+    C: 1.0                                        # Regularization strength (lower = more regularization)
+    max_iter: 2000                                # Maximum iterations for convergence
+    solver: liblinear                             # Optimization algorithm
+    class_weight: balanced                        # Handle class imbalance automatically
+    random_state: 42                              # Random seed for reproducibility
+    
+  # Stochastic Gradient Descent hyperparameters
+  sgd_logistic:
+    loss: log_loss                                # Logistic loss function
+    penalty: l2                                   # L2 regularization
+    alpha: 0.0001                                 # Regularization strength
+    max_iter: 5                                   # Maximum iterations (low for transfer learning)
+    random_state: 42                              # Random seed for reproducibility
+    
+  # XGBoost hyperparameters
+  xgboost:
+    n_estimators: 500                             # Number of boosting rounds
+    learning_rate: 0.05                           # Step size shrinkage (lower = more conservative)
+    max_depth: 6                                  # Maximum tree depth
+    subsample: 0.8                                # Fraction of samples used per tree
+    colsample_bytree: 0.8                         # Fraction of features used per tree
+    random_state: 42                              # Random seed for reproducibility
+    
+  # CatBoost hyperparameters
+  catboost:
+    iterations: 500                               # Number of boosting iterations
+    learning_rate: 0.05                           # Learning rate (step size)
+    depth: 6                                      # Tree depth
+    l2_leaf_reg: 3                                # L2 regularization coefficient
+    bootstrap_type: Bernoulli                     # Bootstrap sampling method
+    subsample: 0.8                                # Fraction of samples used
+    eval_metric: Logloss                          # Evaluation metric
+    od_type: Iter                                 # Overfitting detection type
+    od_wait: 50                                   # Iterations to wait for improvement
+    random_seed: 42                               # Random seed for reproducibility
+    allow_writing_files: false                    # Disable file writing
+    verbose: false                                # Suppress training output
+    
+  # LightGBM hyperparameters
+  lightgbm:
+    n_estimators: 500                             # Number of boosting rounds
+    learning_rate: 0.05                           # Learning rate
+    max_depth: 6                                  # Maximum tree depth
+    num_leaves: 31                                # Maximum number of leaves per tree
+    subsample: 0.8                                # Fraction of samples used
+    colsample_bytree: 0.8                         # Fraction of features used
+    reg_alpha: 0.1                                # L1 regularization
+    reg_lambda: 0.1                               # L2 regularization
+    random_state: 42                              # Random seed for reproducibility
+    n_jobs: -1                                    # Use all available CPU cores
+    verbosity: -1                                 # Suppress training output
+    
+  # Neural Network (MLP) hyperparameters
+  neural_network:
+    hidden_layer_sizes: [100, 50]                 # Architecture: 100 neurons, then 50 neurons
+    activation: relu                              # Activation function
+    solver: adam                                  # Optimization algorithm
+    alpha: 0.001                                  # L2 regularization parameter
+    learning_rate: adaptive                       # Adaptive learning rate
+    max_iter: 500                                 # Maximum training iterations
+    early_stopping: true                          # Stop when validation score stops improving
+    validation_fraction: 0.1                      # Fraction of training data for validation
+    n_iter_no_change: 20                          # Iterations to wait for improvement
+    random_state: 42                              # Random seed for reproducibility

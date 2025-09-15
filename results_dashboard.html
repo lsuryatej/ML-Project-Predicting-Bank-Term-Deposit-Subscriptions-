@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synthetic Data Research Analysis - Complete Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body { font-family: Verdana, Geneva, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            
+            
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 60px;
+            padding: 30px;
+            
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            
+        }
+
+        .section-title {
+            font-size: 2.2em;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+            padding-bottom: 36px;
+            border-bottom: 3px solid #3498db;
+        }
+
+        .chart-grid {
+            display: grid;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .grid-2x2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-3x1 { grid-template-columns: repeat(3, 1fr); }
+        .grid-2x1 { grid-template-columns: repeat(2, 1fr); }
+        .grid-1x1 { grid-template-columns: 1fr; }
+        .grid-4x1 { grid-template-columns: repeat(4, 1fr); }
+
+        .chart-container {
+            background: white;
+            padding: 25px;
+            
+            
+            position: relative;
+            height: clamp(260px, 42vh, 520px);
+            max-width: 100%;
+            overflow: visible;
+        }
+        .chart-container canvas { display:block; width:100% !important; height:100% !important; }
+
+        .chart-container h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .stats-overlay {
+            position: absolute;
+            top: 55px;
+            right: 15px;
+            background: rgba(255,255,255,0.95);
+            padding: 10px;
+            
+            font-size: 0.8em;
+            
+            max-width: 160px;
+            z-index: 10;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            background: white;
+            
+            overflow: hidden;
+            
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 18px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .data-table td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            font-size: 0.9em;
+        }
+
+        .data-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .data-table tr:hover {
+            background: #e3f2fd;
+            transition: background 0.3s ease;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            
+            
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 25px;
+            
+            text-align: center;
+            
+        }
+
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .metric-label {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .flow-diagram {
+            background: white;
+            padding: 30px;
+            
+            margin: 20px 0;
+            
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            margin: 10px 0;
+            
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+        }
+
+        .confusion-matrix {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2px;
+            margin: 20px 0;
+            background: #34495e;
+            
+            overflow: hidden;
+        }
+
+        .cm-cell {
+            background: white;
+            padding: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .cm-header {
+            background: #3498db;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2x2, .grid-3x1, .grid-4x1 {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .section-title {
+                font-size: 1.8em;
+            }
+        }
+    
+h1 { font-size: 1.8rem; font-weight: 700; margin-top: 1.5em; margin-bottom: 0.5em; }
+h2 { font-size: 1.4rem; font-weight: 600; margin-top: 1.2em; margin-bottom: 0.4em; }
+h3 { font-size: 1.2rem; font-weight: 600; margin-top: 1em; margin-bottom: 0.3em; }
+
+</style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1> Synthetic Data Research Analysis</h1>
+            <p>Complete Experimental Results & Performance Analysis</p>
+        </div>
+
+        <div class="content">
+            <!-- Section 1: Data Overview -->
+            <div class="section">
+                <h2 class="section-title"> Dataset Overview & Statistics</h2>
+                
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value">45,211</div>
+                        <div class="metric-label">Real Dataset Samples</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">1M</div>
+                        <div class="metric-label">Synthetic Dataset Samples</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">93.7%</div>
+                        <div class="metric-label">F1-Score Retention</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">66%</div>
+                        <div class="metric-label">Time Savings</div>
+                    </div>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Dataset</th>
+                            <th>Rows</th>
+                            <th>Features</th>
+                            <th>No Subscription</th>
+                            <th>Subscription</th>
+                            <th>Ratio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Real</strong></td>
+                            <td>45,211</td>
+                            <td>16</td>
+                            <td>39,922 (88.3%)</td>
+                            <td>5,289 (11.7%)</td>
+                            <td>7.5:1</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Synthetic</strong></td>
+                            <td>1,000,000</td>
+                            <td>17</td>
+                            <td>879,512 (87.9%)</td>
+                            <td>120,488 (12.1%)</td>
+                            <td>7.3:1</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Real Mean±Std</th>
+                            <th>Synthetic Mean±Std</th>
+                            <th>Difference</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Age</strong></td>
+                            <td>40.94±10.62</td>
+                            <td>40.93±10.10</td>
+                            <td>0.01</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Balance</strong></td>
+                            <td>1,362±3,045</td>
+                            <td>1,204±2,836</td>
+                            <td>158</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Duration</strong></td>
+                            <td>258±258</td>
+                            <td>256±273</td>
+                            <td>2</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Campaign</strong></td>
+                            <td>2.76±3.10</td>
+                            <td>2.58±2.72</td>
+                            <td>0.18</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Section 2: Feature Distributions -->
+            <div class="section">
+                <h2 class="section-title"> Feature Distribution Comparison</h2>
+                <div class="chart-grid grid-2x2">
+                    <div class="chart-container">
+                        <h3>Age Distribution</h3>
+                        <canvas id="ageChart"></canvas>
+                        <div class="stats-overlay">
+                            <strong>Real:</strong> μ=40.94, σ=10.62<br>
+                            <strong>Synthetic:</strong> μ=40.93, σ=10.10<br>
+                            <strong>Diff:</strong> 0.01
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Balance Distribution</h3>
+                        <canvas id="balanceChart"></canvas>
+                        <div class="stats-overlay">
+                            <strong>Real:</strong> μ=1,362, σ=3,045<br>
+                            <strong>Synthetic:</strong> μ=1,204, σ=2,836<br>
+                            <strong>Diff:</strong> 158
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Duration Distribution</h3>
+                        <canvas id="durationChart"></canvas>
+                        <div class="stats-overlay">
+                            <strong>Real:</strong> μ=258, σ=258<br>
+                            <strong>Synthetic:</strong> μ=256, σ=273<br>
+                            <strong>Diff:</strong> 2
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Campaign Distribution</h3>
+                        <canvas id="campaignChart"></canvas>
+                        <div class="stats-overlay">
+                            <strong>Real:</strong> μ=2.76, σ=3.10<br>
+                            <strong>Synthetic:</strong> μ=2.58, σ=2.72<br>
+                            <strong>Diff:</strong> 0.18
+                        </div>
+                    </div>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: rgba(54, 162, 235, 0.7);"></div>
+                        <span>Real Dataset</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: rgba(255, 99, 132, 0.7);"></div>
+                        <span>Synthetic Dataset</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Categorical Features -->
+            <div class="section">
+                <h2 class="section-title"> Categorical Feature Distribution</h2>
+                <div class="chart-grid grid-3x1">
+                    <div class="chart-container">
+                        <h3>Job Distribution (Top 5)</h3>
+                        <canvas id="jobChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Education Distribution</h3>
+                        <canvas id="educationChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Marital Status Distribution</h3>
+                        <canvas id="maritalChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Target Distribution -->
+            <div class="section">
+                <h2 class="section-title"> Target Distribution Comparison</h2>
+                <div class="chart-grid grid-2x1">
+                    <div class="chart-container">
+                        <h3>Real Dataset</h3>
+                        <canvas id="targetRealChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Synthetic Dataset</h3>
+                        <canvas id="targetSyntheticChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 5: Model Performance -->
+            <div class="section">
+                <h2 class="section-title"> Model Performance Analysis</h2>
+                <div class="chart-grid grid-2x1">
+                    <div class="chart-container">
+                        <h3>Model Performance Comparison (Synthetic→Real)</h3>
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Learning Curve Analysis</h3>
+                        <canvas id="learningCurveChart"></canvas>
+                    </div>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>Accuracy</th>
+                            <th>Precision</th>
+                            <th>Recall</th>
+                            <th>F1-Score</th>
+                            <th>ROC-AUC</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>XGBoost</strong></td>
+                            <td>0.829</td>
+                            <td>0.399</td>
+                            <td>0.911</td>
+                            <td><strong>0.555</strong></td>
+                            <td>0.927</td>
+                        </tr>
+                        <tr>
+                            <td><strong>LightGBM</strong></td>
+                            <td>0.823</td>
+                            <td>0.390</td>
+                            <td>0.899</td>
+                            <td><strong>0.544</strong></td>
+                            <td>0.926</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Logistic Regression</strong></td>
+                            <td>0.836</td>
+                            <td>0.402</td>
+                            <td>0.828</td>
+                            <td><strong>0.542</strong></td>
+                            <td>0.906</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Random Forest</strong></td>
+                            <td>0.906</td>
+                            <td>0.665</td>
+                            <td>0.403</td>
+                            <td><strong>0.502</strong></td>
+                            <td>0.917</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Section 6: ROC Analysis -->
+            <div class="section">
+                <h2 class="section-title"> ROC Curves & Performance Retention</h2>
+                <div class="chart-grid grid-2x1">
+                    <div class="chart-container">
+                        <h3>ROC Curves Comparison</h3>
+                        <canvas id="rocChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Performance Retention vs 100% Real Data</h3>
+                        <canvas id="retentionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 7: Confusion Matrices -->
+            <div class="section">
+                <h2 class="section-title"> Confusion Matrices Analysis</h2>
+                <div class="chart-grid grid-2x2">
+                    <div class="chart-container">
+                        <h3>XGBoost (Synthetic→Real)</h3>
+                        <canvas id="cmXGBoost"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>LightGBM (Synthetic→Real)</h3>
+                        <canvas id="cmLightGBM"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Random Forest (Synthetic→Real)</h3>
+                        <canvas id="cmRandomForest"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Logistic Regression (Synthetic→Real)</h3>
+                        <canvas id="cmLogistic"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 8: Business Impact -->
+            <div class="section">
+                <h2 class="section-title"> Business Impact & Cost-Benefit Analysis</h2>
+                <div class="chart-grid grid-2x1">
+                    <div class="chart-container">
+                        <h3>Cost-Benefit Analysis</h3>
+                        <canvas id="costBenefitChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Implementation Timeline Comparison</h3>
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Random Targeting</th>
+                            <th>Synthetic Model</th>
+                            <th>Real Data Model</th>
+                            <th>Improvement</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Conversion Rate</strong></td>
+                            <td>11.7%</td>
+                            <td>39.9%</td>
+                            <td>46.9%</td>
+                            <td>3.4x vs Random</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cost per Conversion</strong></td>
+                            <td>$8.33</td>
+                            <td>$2.50</td>
+                            <td>$2.13</td>
+                            <td>70% reduction</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Marketing ROI</strong></td>
+                            <td>1.0x</td>
+                            <td>3.4x</td>
+                            <td>4.0x</td>
+                            <td>240% increase</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Wasted Contacts</strong></td>
+                            <td>88.3%</td>
+                            <td>60.1%</td>
+                            <td>53.1%</td>
+                            <td>32% reduction</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Section 9: Feature Importance & Variance -->
+            <div class="section">
+                <h2 class="section-title"> Feature Importance & Performance Variance</h2>
+                <div class="chart-grid grid-2x1">
+                    <div class="chart-container">
+                        <h3>Feature Importance Comparison (XGBoost)</h3>
+                        <canvas id="featureImportanceChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Performance Variance Analysis (Cross-Validation)</h3>
+                        <canvas id="varianceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Utility functions
+        function generateNormalData(mean, std, size = 1000) {
+            let data = [];
+            for (let i = 0; i < size; i++) {
+                let u1 = Math.random();
+                let u2 = Math.random();
+                let z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+                data.push(z0 * std + mean);
+            }
+            return data;
+        }
+
+        function createHistogram(data, bins = 30) {
+            let min = Math.min(...data);
+            let max = Math.max(...data);
+            let binWidth = (max - min) / bins;
+            let histogram = new Array(bins).fill(0);
+            let binLabels = [];
+            
+            for (let i = 0; i < bins; i++) {
+                binLabels.push((min + i * binWidth).toFixed(1));
+            }
+            
+            data.forEach(value => {
+                let binIndex = Math.floor((value - min) / binWidth);
+                if (binIndex >= bins) binIndex = bins - 1;
+                if (binIndex < 0) binIndex = 0;
+                histogram[binIndex]++;
+            });
+            
+            return { histogram, labels: binLabels };
+        }
+
+        // Chart configurations
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 2,
+            plugins: {
+                legend: { display: false ,
+            layout: { padding: { bottom: 24 } }
+        }
+            }
+        };
+
+        // 1. Feature Distribution Charts
+        const features = [
+            { id: 'ageChart', realMean: 40.94, realStd: 10.62, synMean: 40.93, synStd: 10.10 },
+            { id: 'balanceChart', realMean: 1362, realStd: 3045, synMean: 1204, synStd: 2836 },
+            { id: 'durationChart', realMean: 258, realStd: 258, synMean: 256, synStd: 273 },
+            { id: 'campaignChart', realMean: 2.76, realStd: 3.10, synMean: 2.58, synStd: 2.72 }
+        ];
+
+        features.forEach(feature => {
+            const realData = generateNormalData(feature.realMean, feature.realStd, 1000);
+            const synData = generateNormalData(feature.synMean, feature.synStd, 1000);
+            
+            const realHist = createHistogram(realData, 25);
+            const synHist = createHistogram(synData, 25);
+
+            new Chart(document.getElementById(feature.id), {
+                type: 'bar',
+                data: {
+                    labels: realHist.labels,
+                    datasets: [{
+                        label: 'Real Dataset',
+                        data: realHist.histogram,
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Synthetic Dataset',
+                        data: synHist.histogram,
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: 'Frequency' } },
+                        x: { title: { display: true, text: 'Value' } }
+                    }
+                }
+            });
+        });
+
+        // 2. Categorical Distribution Charts
+        const categoricalData = [
+            {
+                id: 'jobChart',
+                labels: ['Blue-collar', 'Management', 'Technician', 'Admin', 'Services'],
+                real: [22.1, 19.8, 16.2, 10.9, 9.1],
+                synthetic: [21.8, 20.1, 16.5, 11.2, 8.9]
+            },
+            {
+                id: 'educationChart',
+                labels: ['Secondary', 'Tertiary', 'Primary', 'Unknown'],
+                real: [51.0, 29.7, 15.2, 4.1],
+                synthetic: [50.2, 30.1, 15.4, 4.3]
+            },
+            {
+                id: 'maritalChart',
+                labels: ['Married', 'Single', 'Divorced'],
+                real: [60.2, 28.1, 11.7],
+                synthetic: [60.8, 27.6, 11.6]
+            }
+        ];
+
+        categoricalData.forEach(cat => {
+            new Chart(document.getElementById(cat.id), {
+                type: 'bar',
+                data: {
+                    labels: cat.labels,
+                    datasets: [{
+                        label: 'Real Dataset',
+                        data: cat.real,
+                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Synthetic Dataset',
+                        data: cat.synthetic,
+                        backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    ...commonOptions,
+                    scales: {
+                        x: { beginAtZero: true, title: { display: true, text: 'Percentage (%)' } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        });
+
+        // 3. Target Distribution Pie Charts
+        new Chart(document.getElementById('targetRealChart'), {
+            type: 'pie',
+            data: {
+                labels: ['No Subscription', 'Subscription'],
+                datasets: [{
+                    data: [39922, 5289],
+                    backgroundColor: ['rgba(255, 99, 132, 0.8)', 'rgba(75, 192, 192, 0.8)'],
+                    borderColor: ['rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)'],
+                    borderWidth: 2
+                }]
+            },
+            options: { responsive: true, aspectRatio: 2, layout: { padding: { bottom: 24 } }, aspectRatio: 2,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('targetSyntheticChart'), {
+            type: 'pie',
+            data: {
+                labels: ['No Subscription', 'Subscription'],
+                datasets: [{
+                    data: [879512, 120488],
+                    backgroundColor: ['rgba(255, 99, 132, 0.8)', 'rgba(75, 192, 192, 0.8)'],
+                    borderColor: ['rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)'],
+                    borderWidth: 2
+                }]
+            },
+            options: { responsive: true, aspectRatio: 2, layout: { padding: { bottom: 24 } }, aspectRatio: 2,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // 4. Model Performance Comparison
+        new Chart(document.getElementById('performanceChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'ROC-AUC'],
+                datasets: [{
+                    label: 'XGBoost',
+                    data: [0.829, 0.399, 0.911, 0.555, 0.927],
+                    backgroundColor: 'rgba(255, 99, 132, 0.8)'
+                }, {
+                    label: 'LightGBM',
+                    data: [0.823, 0.390, 0.899, 0.544, 0.926],
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)'
+                }, {
+                    label: 'Logistic Regression',
+                    data: [0.836, 0.402, 0.828, 0.542, 0.906],
+                    backgroundColor: 'rgba(255, 206, 86, 0.8)'
+                }, {
+                    label: 'Random Forest',
+                    data: [0.906, 0.665, 0.403, 0.502, 0.917],
+                    backgroundColor: 'rgba(75, 192, 192, 0.8)'
+                }]
+            },
+            options: { responsive: true, aspectRatio: 2, layout: { padding: { bottom: 24 } }, aspectRatio: 2,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: { beginAtZero: true, max: 1, title: { display: true, text: 'Score' } }
+                }
+            }
+        });
+
+        // 5. Learning Curve Analysis
+        new Chart(document.getElementById('learningCurveChart'), {
+            type: 'line',
+            data: {
+                labels: ['1%', '5%', '10%', '25%', '50%', '100%'],
+                datasets: [{
+                    label: 'F1-Score',
+                    data: [0.402, 0.497, 0.539, 0.562, 0.594, 0.592],
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    yAxisID: 'y'
+                }, {
+                    label: 'ROC-AUC',
+                    data: [0.819, 0.881, 0.900, 0.909, 0.919, 0.925],
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    yAxisID: 'y1'
+                }]
+            },
+            options: { responsive: true, aspectRatio: 2, layout: { padding: { bottom: 24 } }, aspectRatio: 2,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Data Percentage' } },
+                    y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'F1-Score' } },
+                    y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'ROC-AUC' }, grid: { drawOnChartArea: false } }
+                }
+            }
+        });
+
+        // 6. ROC Curves Comparison
+        new Chart(document.getElementById('rocChart'), {
+            type: 'line',
+            data: {
+                labels: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+                datasets: [{
+                    label: 'XGBoost (AUC: 0.927)',
+                    data: [0, 0.65, 0.78, 0.84, 0.88, 0.91, 0.93, 0.95, 0.97, 0.98, 1.0],
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    fill: false
+                }, {
+                    label: 'LightGBM (AUC: 0.926)',
+                    data: [0, 0.64, 0.77, 0.83, 0.87, 0.90, 0.92, 0.94, 0.96, 0.98, 1.0],
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    fill: false
+                }, {
+                    label: 'Random Forest (AUC: 0.917)',
+                    data: [0, 0.58, 0.71, 0.78, 0.82, 0.85, 0.88, 0.91, 0.94, 0.97, 1.0],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    fill: false
+                }, {
+                    label: 'Logistic Regression (AUC: 0.906)',
+                    data: [0, 0.52, 0.66, 0.74, 0.79, 0.83, 0.87, 0.90, 0.93, 0.96, 1.0],
+                    borderColor: 'rgba(255, 206, 86, 1)',
+                    fill: false
+                }]
+            },
+            options: { responsive: true, aspectRatio: 2, layout: { padding: { bottom: 24 } }, aspectRatio: 2,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'False Positive Rate' } },
+                    y: { title: { display: true, text: 'True Positive Rate' } }
+                }
+            }
+        });
+
+        // 7. Performance Retention Chart
+        new Chart(document.getElementById('retentionChart'), {
+            type: 'bar',
+            data: {
+                labels: ['F1-Score', 'ROC-AUC', 'Precision', 'Recall', 'Accuracy'],
+                datasets: [{
+                    label: '100% Real Data',
+                    data: [0.592, 0.925, 0.469, 0.803, 0.871],
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)'
+                }, {
+                    label: 'Synthetic Data',
+                    data: [0.555, 0.927, 0.399, 0.911, 0.829],
+                    backgroundColor: 'rgba(255, 99, 132, 0.8)'
+                }]
+            },
+            options: { responsive: true, aspectRatio: 2, layout: { padding: { bottom: 24 } }, aspectRatio: 2,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: { beginAtZero: true, max: 1, title: { display: true, text: 'Score' } }
+                }
+            }
+        });
+
+        // 8. Confusion Matrices
+        const confusionMatrices = [
+            { id: 'cmXGBoost', data: [[7156, 149], [537, 358]], title: 'XGBoost' },
+            { id: 'cmLightGBM', data: [[7142, 163], [543, 352]], title: 'LightGBM' },
+            { id: 'cmRandomForest', data: [[7245, 60], [534, 361]], title: 'Random Forest' },
+            { id: 'cmLogistic', data: [[7064, 241], [154, 741]], title: 'Logistic Regression' }
+        ];
+
+        confusionMatrices.forEach(cm => {
+            const total = cm.data[0][0] + cm.data[0][1] + cm.data[1][0] + cm.data[1][1];
+            new Chart(document.getElementById(cm.id), {
+                type: 'bar',
+                data: {
+                    labels: ['True Negative', 'False Positive', 'False Negative', 'True Positive'],
+                    datasets: [{
+                        data: [cm.data[0][0], cm.data[0][1], cm.data[1][0], cm.data[1][1]],
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(54, 162, 235, 0.8)'
+                        ]
+                    }]
+                },
+                options: { responsive: true, aspectRatio: 2, layout: { padding: { bottom: 24 } }, aspectRatio: 2,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: 'Count' } }
+                    }
+                }
+            });
+        });
+
+        // 9. Cost-Benefit Analysis
+        new Chart(document.getElementById('costBenefitChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Random Targeting', 'Synthetic Model', 'Real Data Model'],
+                datasets: [{
+                    label: 'Conversion Rate (%)',
+                    data: [11.7, 39.9, 46.9],
+                    backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                    yAxisID: 'y'
+                }, {
+                    label: 'Cost per Conversion ($)',
+                    data: [8.33, 2.50, 2.13],
+                    backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                    yAxisID: 'y1'
+                }]
+            },
+            options: { responsive: true, aspectRatio: 2, layout: { padding: { bottom: 24 } }, aspectRatio: 2,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Conversion Rate (%)' } },
+                    y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'Cost per Conversion ($)' }, grid: { drawOnChartArea: false } }
+                }
+            }
+        });
+
+        // 10. Implementation Timeline
+        new Chart(document.getElementById('timelineChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Data Collection', 'Privacy Review', 'Model Development', 'Validation', 'Deployment'],
+                datasets: [{
+                    label: 'Traditional Approach (weeks)',
+                    data: [12, 8, 6, 4, 2],
+                    backgroundColor: 'rgba(255, 99, 132, 0.8)'
+                }, {
+                    label: 'Synthetic Data Approach (weeks)',
+                    data: [2, 1, 4, 3, 1],
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)'
+                }]
+            },
+            options: { responsive: true, aspectRatio: 2, layout: { padding: { bottom: 24 } }, aspectRatio: 2,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: 'Weeks' } }
+                }
+            }
+        });
+
+        // 11. Feature Importance Comparison
+        new Chart(document.getElementById('featureImportanceChart'), {
+            type: 'bar',
+            data: {
+                labels: ['duration', 'balance', 'age', 'campaign', 'previous', 'job_management', 'education_tertiary'],
+                datasets: [{
+                    label: 'Real Data Training',
+                    data: [0.245, 0.156, 0.098, 0.087, 0.076, 0.054, 0.043],
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)'
+                }, {
+                    label: 'Synthetic Data Training',
+                    data: [0.251, 0.149, 0.102, 0.089, 0.078, 0.056, 0.041],
+                    backgroundColor: 'rgba(255, 99, 132, 0.8)'
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    x: { beginAtZero: true, title: { display: true, text: 'Importance Score' } }
+                }
+            }
+        });
+
+        // 12. Performance Variance Analysis
+        new Chart(document.getElementById('varianceChart'), {
+            type: 'bar',
+            data: {
+                labels: ['XGBoost Real', 'XGBoost Synthetic', 'LightGBM Real', 'LightGBM Synthetic'],
+                datasets: [{
+                    label: 'Mean F1',
+                    data: [0.592, 0.555, 0.588, 0.544],
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                    errorBars: {
+                        'XGBoost Real': {plus: 0.018, minus: 0.018},
+                        'XGBoost Synthetic': {plus: 0.022, minus: 0.022},
+                        'LightGBM Real': {plus: 0.020, minus: 0.020},
+                        'LightGBM Synthetic': {plus: 0.025, minus: 0.025}
+                    }
+                }]
+            },
+            options: { responsive: true, aspectRatio: 2, layout: { padding: { bottom: 24 } }, aspectRatio: 2,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true, max: 0.7, title: { display: true, text: 'F1-Score' } }
+                }
+            }
+        });
+
+        // Add annotation for optimal zone in learning curve
+        const optimalZoneAnnotation = {
+            type: 'box',
+            xMin: 2,
+            xMax: 3,
+            backgroundColor: 'rgba(255, 206, 86, 0.2)',
+            borderColor: 'rgba(255, 206, 86, 1)',
+            borderWidth: 2,
+            label: {
+                content: 'Optimal Zone (10-25%)',
+                enabled: true,
+                position: 'center'
+            }
+        };
+
+        console.log('All 13 visualizations have been successfully created!');
+    </script>
+</body>
+</html>

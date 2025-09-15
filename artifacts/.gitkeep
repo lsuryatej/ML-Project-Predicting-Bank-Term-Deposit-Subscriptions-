@@ -1,0 +1,5 @@
+# This file ensures the artifacts directory is tracked by git
+# Generated outputs will be stored in subdirectories:
+# - models/: Trained model files
+# - results/: Experiment results and metrics
+# - plots/: Generated visualizations
