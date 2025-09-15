@@ -117,6 +117,7 @@ bank-term-deposit-prediction/
 ├── requirements.txt          # Python dependencies
 ├── report.md                 # Comprehensive analysis report
 ├── results_dashboard.html    # Interactive visualization dashboard
+├── dashboard.png             # Dashboard
 ├── LICENSE                   # MIT license
 └── README.md                 # This file
 ```
@@ -160,6 +161,7 @@ Our approach ensures reliable results through:
 ## Documentation
 
 - **[Complete Analysis Report](report.md)**: Detailed methodology and results
+- **[Dashboard](dashboard.png)**: Dashboard Image
 - **[Results Dashboard](results_dashboard.html)**: Interactive charts and visualization data
 
 ## Contributing
